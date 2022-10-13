@@ -2,7 +2,7 @@
 
 import sys
 
-# ./P4a_mapper.py < ../../Datasets/ml-latest-small/ratings.csv | sort -g | ./P4a_reducer.py | ./P4b_mapper.py | sort -g | ./P4b_reducer.py
+# ./P4a_mapper.py < ../../Datasets/ml-latest-small/ratings.csv | sort -k 1,1 -t $'\t' | ./P4a_reducer.py | ./P4b_mapper.py | sort -k 1,1 -t $'\t' | ./P4b_reducer.py
 
 sys.stdin.readline()
 
