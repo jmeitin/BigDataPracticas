@@ -7,16 +7,21 @@ import re
 conf = SparkConf().setAppName('Grep with Spark')
 sc = SparkContext(conf = conf)
 
-word = sys.argv[1]
+word = sys.argv[1].lower()
 file = sys.argv[2]
 
-def makeStringArray(string_list):
-    str1 = ""
- 
-    for ele in string_list:
-        str1 += ele + " "
- 
-    return str1
+def findWord(line):
 
-mobydickRDD = sc.textFile(file).map(lambda line: re.sub(r'\W+', ' ', line).split())\
-    .filter(lambda line: line.count(word)).map(lambda line: makeStringArray(line)).saveAsTextFile("output")
+    words = re.sub(r'\W+', ' ', line).split()
+
+    for w in words:
+        if word == w.lower():
+            return True
+
+    return False
+    
+
+
+
+mobydickRDD = sc.textFile(file)\
+    .filter(lambda line: findWord(line)).saveAsTextFile("output")
