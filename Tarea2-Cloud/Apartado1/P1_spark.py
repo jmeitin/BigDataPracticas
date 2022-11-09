@@ -1,8 +1,10 @@
+# COMMAND --> spark-submit P1_spark.py word file
+
+# VERSION CON RDDS
+
 from pyspark import SparkConf, SparkContext
 import sys
 import re
-
-# spark-submit P1_spark.py word file
 
 conf = SparkConf().setAppName('Grep with Spark')
 sc = SparkContext(conf = conf)
@@ -20,8 +22,5 @@ def findWord(line):
 
     return False
     
-
-
-
 mobydickRDD = sc.textFile(file)\
     .filter(lambda line: findWord(line)).saveAsTextFile("output")
