@@ -6,28 +6,22 @@ from pyspark import SparkConf, SparkContext
 from pyspark.sql.session import SparkSession
 import pyspark.sql.functions as Functions
 
-conf = SparkConf().setAppName('Close Prive Average')
+conf = SparkConf().setAppName('Close Avg Price')
 sc = SparkContext(conf = conf)
 spark = SparkSession(sc)
 
-tabla = spark.read.option("header", "true").csv("GOOGLE.csv").drop("Open", "High", "Low", "Adj Close", "Volume")
+# Lee el csv eliminando las columnas que no interesan
+priceDF = spark.read.option("header", "true").csv("GOOGLE.csv").drop("Open", "High", "Low", "Adj Close", "Volume")
 
-tabla = tabla.withColumn('Date', Functions.split(tabla["Date"], '-').getItem(0))
+# La fecha tiene el formato YY-MM-DD, y lo que enteresa para este ejercicio es YY.
+priceDF = priceDF.withColumn('Date', Functions.split(priceDF["Date"], '-').getItem(0))
 
-tabla = tabla.withColumn("Close", Functions.regexp_replace(tabla["Close"], "\\.", ""))
+# Castea la columna con los valores (Close) a float para hacer el avg posteriormente.
+priceDF = priceDF.withColumn("Close", priceDF["Close"].cast("float"))
 
-#castear a int para poder hacer los calculso mas adelante
-tabla = tabla.withColumn("Close", tabla["Close"].cast("int"))
+# Agrupa por años haciendo el avg y finalmente ordena por año
+priceDF = priceDF.groupBy("Date").mean("Close").sort(priceDF["Date"])
 
-#calcular  mean(la media)
-tabla = tabla.groupBy("Date").mean("Close")
+priceDF.rdd.saveAsTextFile("output.txt")
 
-#ordenar la coliumna de fechas
-tabla = tabla.sort(tabla["Date"])
-
-
-#para guardar en un archivo los resultados
-tabla.rdd.saveAsTextFile("output.txt")
-
-#para mostrar en la consola los resultados
-print(tabla.show(50,False))
+priceDF.show()
